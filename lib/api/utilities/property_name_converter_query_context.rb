@@ -1,3 +1,4 @@
+#-- encoding: UTF-8
 #-- copyright
 # OpenProject is a project management system.
 # Copyright (C) 2012-2017 the OpenProject Foundation (OPF)
@@ -26,23 +27,21 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
-require 'spec_helper'
-
-describe Queries::WorkPackages::Filter::CreatedAtFilter, type: :model do
-  it_behaves_like 'basic query filter' do
-    let(:order) { 9 }
-    let(:type) { :datetime_past }
-    let(:class_key) { :created_at }
-
-    describe '#available?' do
-      it 'is true' do
-        expect(instance).to be_available
+module API
+  module Utilities
+    # The PropertyNameConverter checks whether the object responds to the attribute
+    # that is to be converted.
+    # If the context is Query (e.g. when filters are restored), a WorkPackage
+    # is used instead.  However, some of the methods a work package does not
+    # respond to are nevertheless valid for transformation.  We therefore
+    # delegate to a WorkPackage per default but also explicitly respond in some
+    # cases.
+    class PropertyNameConverterQueryContext < SimpleDelegator
+      def initialize
+        super(WorkPackage.new)
       end
-    end
 
-    describe '#allowed_values' do
-      it 'is nil' do
-        expect(instance.allowed_values).to be_nil
+      def subproject_id
       end
     end
   end
