@@ -51,7 +51,7 @@ describe('WorkPackageCacheService', () => {
         self: ""
       }
     });
-    workPackage1.id = 1;
+    workPackage1.id = '1';
     workPackage1.schema = {
       '$load': () => { return $q.when(true) }
     };
@@ -91,7 +91,7 @@ describe('WorkPackageCacheService', () => {
   it('should return/stream a work package every time it gets updated', (done) => {
     let expected = 0;
     let workPackage: any = new WorkPackageResource({_links: {self: ""}});
-    workPackage.id = 1;
+    workPackage.id = '1';
     workPackage.dummy = 0;
     workPackage.schema = {
       '$load': () => { return $q.when(true) }
