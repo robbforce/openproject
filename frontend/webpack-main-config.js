@@ -63,7 +63,13 @@ fs.readdirSync(translations).forEach(function (file) {
 });
 
 var loaders = [
-  { test: /\.tsx?$/, loader: 'ng-annotate-loader!ts-loader'},
+  { test: /\.tsx?$/,
+    loader: 'ts-loader',
+    options: {
+      logLevel: 'info',
+      configFileName: path.resolve(__dirname, 'tsconfig.json')
+    }
+  },
   {
     test: /\.css$/,
     loader: ExtractTextPlugin.extract({
