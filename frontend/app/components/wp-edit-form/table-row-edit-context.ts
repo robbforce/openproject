@@ -1,4 +1,3 @@
-import {WorkPackageResource} from '../api/api-v3/hal-resources/work-package-resource.service';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -35,6 +34,7 @@ import {WorkPackageCacheService} from '../work-packages/work-package-cache.servi
 import {WorkPackageTableColumnsService} from '../wp-fast-table/state/wp-table-columns.service';
 import {locateRow} from '../wp-fast-table/helpers/wp-table-row-helpers';
 import {States} from '../states.service';
+import {WorkPackageResource} from '../api/api-v3/hal-resources/work-package-resource.service';
 
 export class TableRowEditContext implements WorkPackageEditContext {
   // Injections
@@ -67,7 +67,7 @@ export class TableRowEditContext implements WorkPackageEditContext {
 
   public requireVisible(name:string):Promise<JQuery> {
     this.wpTableColumns.addColumn(name);
-    let updated = this.states.table.rendered.observe(null).take(1).toPromise();
+    let updated = this.states.table.rendered.observeOnScope(null).take(1).toPromise();
     return updated.then(() => {
       return this.find(name);
     })

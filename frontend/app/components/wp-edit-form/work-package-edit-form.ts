@@ -67,7 +67,8 @@ export class WorkPackageEditForm {
               public editMode = false) {
     injectorBridge(this);
 
-    this.wpCacheService.loadWorkPackage(workPackageId).observe(null)
+    this.wpCacheService.loadWorkPackage(workPackageId)
+      .observeUntil(this.states.table.stopAllSubscriptions)
       .subscribe((wp: WorkPackageResource) => {
         this.workPackage = wp;
       });

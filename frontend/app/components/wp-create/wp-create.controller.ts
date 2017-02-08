@@ -1,4 +1,3 @@
-import {WorkPackageTableSelection} from '../wp-fast-table/state/wp-table-selection.service';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -27,6 +26,7 @@ import {WorkPackageTableSelection} from '../wp-fast-table/state/wp-table-selecti
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
+import {WorkPackageTableSelection} from '../wp-fast-table/state/wp-table-selection.service';
 import {wpDirectivesModule} from "../../angular-modules";
 import {WorkPackageCreateService} from "./wp-create.service";
 import {WorkPackageResource} from "../api/api-v3/hal-resources/work-package-resource.service";

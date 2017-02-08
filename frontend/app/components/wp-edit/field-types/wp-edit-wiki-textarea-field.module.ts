@@ -1,4 +1,3 @@
-import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -29,6 +28,7 @@ import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 import {EditField} from '../wp-edit-field/wp-edit-field.module';
 import {WorkPackageResource} from '../../api/api-v3/hal-resources/work-package-resource.service';
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class WikiTextareaEditField extends EditField {
 

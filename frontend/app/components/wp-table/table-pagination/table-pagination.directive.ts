@@ -1,4 +1,3 @@
-import {WorkPackageTableMetadata} from '../../wp-fast-table/wp-table-metadata';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -28,6 +27,7 @@ import {WorkPackageTableMetadata} from '../../wp-fast-table/wp-table-metadata';
 // ++
 
 import {WorkPackageTableMetadataService} from '../../wp-fast-table/state/wp-table-metadata.service';
+import {WorkPackageTableMetadata} from '../../wp-fast-table/wp-table-metadata';
 
 angular
   .module('openproject.workPackages.directives')
@@ -125,7 +125,7 @@ function tablePagination(PaginationService,
         }
       }
 
-      wpTableMetadata.metadata.observe(scope).subscribe((metadata:WorkPackageTableMetadata) => {
+      wpTableMetadata.metadata.observeOnScope(scope).subscribe((metadata:WorkPackageTableMetadata) => {
         scope.totalEntries = metadata.total;
         updateCurrentRangeLabel();
         updatePageNumbers();

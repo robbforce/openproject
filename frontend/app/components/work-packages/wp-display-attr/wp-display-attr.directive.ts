@@ -1,4 +1,3 @@
-import {DisplayFieldFactory} from './../../wp-display/wp-display-field/wp-display-field.module';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -27,6 +26,7 @@ import {DisplayFieldFactory} from './../../wp-display/wp-display-field/wp-displa
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
+import {DisplayFieldFactory} from './../../wp-display/wp-display-field/wp-display-field.module';
 import {HalResource} from "../../api/api-v3/hal-resources/hal-resource.service";
 import {wpDirectivesModule} from "../../../angular-modules";
 import {WorkPackageEditFieldController} from "../../wp-edit/wp-edit-field/wp-edit-field.directive";
