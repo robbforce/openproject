@@ -28,6 +28,7 @@
 
 import {DisplayField} from "../wp-display-field/wp-display-field.module";
 import {HalResource} from "../../api/api-v3/hal-resources/hal-resource.service"
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class BooleanDisplayField extends DisplayField {
 
@@ -37,8 +38,7 @@ export class BooleanDisplayField extends DisplayField {
               public name:string,
               public schema) {
     super(resource, name, schema);
-
-    this.WorkPackagesHelper = <op.WorkPackagesHelper>this.$injector.get('WorkPackagesHelper');
+    injectorBridge(this);
   }
 
   public get valueString() {
@@ -55,3 +55,5 @@ export class BooleanDisplayField extends DisplayField {
     return false;
   }
 }
+
+BooleanDisplayField.$inject = ['WorkPackagesHelper'];

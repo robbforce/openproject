@@ -29,9 +29,11 @@
 import {DisplayField} from "../wp-display-field/wp-display-field.module";
 import {WorkPackageResource} from "../../api/api-v3/hal-resources/work-package-resource.service";
 import {UiStateLinkBuilder} from '../../wp-fast-table/builders/ui-state-link-builder';
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class IdDisplayField extends DisplayField {
   public text: Object;
+  public I18n:op.I18n;
   private uiStateBuilder;
 
 
@@ -39,6 +41,7 @@ export class IdDisplayField extends DisplayField {
               public name:string,
               public schema) {
     super(resource, name, schema);
+    injectorBridge(this);
 
     this.uiStateBuilder = new UiStateLinkBuilder();
 
@@ -74,3 +77,5 @@ export class IdDisplayField extends DisplayField {
     return false;
   }
 }
+
+IdDisplayField.$inject = ['I18n'];

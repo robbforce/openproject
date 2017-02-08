@@ -30,10 +30,10 @@ import {HalResource} from "../../api/api-v3/hal-resources/hal-resource.service";
 import {Field, FieldFactory} from "../../wp-field/wp-field.module";
 import {WorkPackageDisplayAttributeController} from "../../work-packages/wp-display-attr/wp-display-attr.directive";
 import {SimpleTemplateRenderer} from '../../angular/simple-template-renderer';
+import {$currentInjector} from '../../angular/angular-injector-bridge.functions';
 
 export class DisplayField extends Field {
   public static type: string;
-  public static $injector: ng.auto.IInjectorService;
   public template: string = null;
   public I18n: op.I18n;
 
@@ -63,10 +63,6 @@ export class DisplayField extends Field {
            this.name;
   }
 
-  protected get $injector(): ng.auto.IInjectorService {
-    return (this.constructor as typeof DisplayField).$injector;
-  }
-
   public render(element: HTMLElement, displayText): void {
     if (this.template == null || this.isEmpty()) {
       element.setAttribute("title", displayText);
@@ -77,7 +73,7 @@ export class DisplayField extends Field {
   }
 
   protected renderTemplate(element, displayText) {
-    let renderer = <SimpleTemplateRenderer> this.$injector.get('templateRenderer');
+    let renderer = <SimpleTemplateRenderer> $currentInjector().get('templateRenderer');
 
     renderer.renderIsolated(element, this.template, {
       workPackage: this.resource,
@@ -95,8 +91,6 @@ export class DisplayField extends Field {
               public name: string,
               public schema) {
     super(resource, name, schema);
-
-    this.I18n = <op.I18n>this.$injector.get('I18n');
   }
 }
 

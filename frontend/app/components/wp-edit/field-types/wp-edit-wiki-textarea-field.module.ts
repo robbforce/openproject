@@ -1,3 +1,4 @@
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -35,11 +36,11 @@ export class WikiTextareaEditField extends EditField {
   public template:string = '/components/wp-edit/field-types/wp-edit-wiki-textarea-field.directive.html';
 
   // Dependencies
-  protected $sce:ng.ISCEService = <ng.ISCEService> WikiTextareaEditField.$injector.get('$sce');
-  protected $http:ng.IHttpService = <ng.IHttpService> WikiTextareaEditField.$injector.get('$http');
-  protected TextileService:ng.IServiceProvider = <ng.ISCEProvider> WikiTextareaEditField.$injector.get('TextileService');
-  protected $timeout:ng.ITimeoutService = <ng.ITimeoutService> WikiTextareaEditField.$injector.get('$timeout');
-  protected I18n:op.I18n = <op.I18n> WikiTextareaEditField.$injector.get('I18n');
+  public $sce:ng.ISCEService;
+  public $http:ng.IHttpService;
+  public TextileService:ng.IServiceProvider;
+  public $timeout:ng.ITimeoutService;
+  public I18n:op.I18n;
 
   // wp resource
   protected workPackage:WorkPackageResource;
@@ -55,6 +56,7 @@ export class WikiTextareaEditField extends EditField {
 
   constructor(workPackage, fieldName, schema) {
     super(workPackage, fieldName, schema);
+    injectorBridge(this);
 
     this.fieldVal = workPackage[fieldName];
     this.workPackage = workPackage;
@@ -104,3 +106,7 @@ export class WikiTextareaEditField extends EditField {
     }
   }
 }
+
+WikiTextareaEditField.$inject = [
+  '$sce', '$http', 'TextileService', '$timeout', 'I18n'
+];

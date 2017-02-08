@@ -27,7 +27,7 @@
 //++
 
 import {HalResource} from './hal-resource.service';
-import {HalLink} from '../hal-link/hal-link.service.ts';
+import {HalLink} from '../hal-link/hal-link.service';
 import {opApiModule} from "../../../../angular-modules";
 import {WorkPackageResource} from './work-package-resource.service';
 

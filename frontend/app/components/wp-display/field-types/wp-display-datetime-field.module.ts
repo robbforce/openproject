@@ -26,12 +26,23 @@
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
+import {HalResource} from '../../api/api-v3/hal-resources/hal-resource.service';
 import {DisplayField} from "../wp-display-field/wp-display-field.module";
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class DateTimeDisplayField extends DisplayField {
-  public get valueString() {
-    const WorkPackagesHelper:any = this.$injector.get('WorkPackagesHelper');
+  public WorkPackagesHelper;
 
-    return WorkPackagesHelper.formatValue(this.value, 'DateTime');
+  constructor(public resource:HalResource,
+              public name: string,
+              public schema) {
+    super(resource, name, schema);
+    injectorBridge(this);
+  }
+
+  public get valueString() {
+    return this.WorkPackagesHelper.formatValue(this.value, 'DateTime');
   }
 }
+
+DateTimeDisplayField.$inject = ['WorkPackagesHelper'];

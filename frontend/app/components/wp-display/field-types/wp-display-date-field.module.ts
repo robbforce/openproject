@@ -26,12 +26,22 @@
 // See doc/COPYRIGHT.rdoc for more details.
 // ++
 
+import {HalResource} from '../../api/api-v3/hal-resources/hal-resource.service';
 import {DisplayField} from "../wp-display-field/wp-display-field.module";
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class DateDisplayField extends DisplayField {
-  public get valueString() {
-    const WorkPackagesHelper:any = this.$injector.get('WorkPackagesHelper');
 
-    return WorkPackagesHelper.formatValue(this.value, 'Date');
+  public WorkPackagesHelper;
+
+  constructor(public resource:HalResource,
+              public name: string,
+              public schema) {
+    super(resource, name, schema);
+    injectorBridge(this);
+  }
+
+  public get valueString() {
+    return this.WorkPackagesHelper.formatValue(this.value, 'Date');
   }
 }

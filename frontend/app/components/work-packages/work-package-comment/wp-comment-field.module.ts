@@ -32,7 +32,7 @@ export class WorkPackageCommentField extends WikiTextareaEditField {
 
   public fieldVal = { raw: '' };
 
-  constructor(workPackage, protected I18n) {
+  constructor(workPackage, public I18n) {
     super(workPackage, 'comment', {name: I18n.t('js.label_comment')});
 
     this.initializeFieldValue();

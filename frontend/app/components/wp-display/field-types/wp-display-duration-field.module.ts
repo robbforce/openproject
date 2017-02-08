@@ -28,19 +28,17 @@
 
 import {DisplayField} from "../wp-display-field/wp-display-field.module";
 import {WorkPackageResource} from "../../api/api-v3/hal-resources/work-package-resource.service";
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class DurationDisplayField extends DisplayField {
-
-  private WorkPackagesHelper:any;
-  private TimezoneService:any;
+  public WorkPackagesHelper;
+  public TimezoneService;
 
   constructor(public resource:WorkPackageResource,
               public name:string,
               public schema) {
     super(resource, name, schema);
-
-    this.WorkPackagesHelper = this.$injector.get('WorkPackagesHelper');
-    this.TimezoneService = this.$injector.get('TimezoneService');
+    injectorBridge(this);
   }
 
   public get valueString() {
@@ -51,3 +49,5 @@ export class DurationDisplayField extends DisplayField {
     return this.TimezoneService.toHours(this.value) === 0;
   }
 }
+
+DurationDisplayField.$inject = ['WorkPackagesHelper', 'TimezoneService'];

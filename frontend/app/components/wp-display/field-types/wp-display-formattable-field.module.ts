@@ -29,16 +29,16 @@
 import {DisplayField} from "../wp-display-field/wp-display-field.module";
 import ExpressionService from "../../common/xss/expression.service";
 import {HalResource} from "../../api/api-v3/hal-resources/hal-resource.service";
+import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class FormattableDisplayField extends DisplayField {
-  protected ExpressionService:ExpressionService;
+  public ExpressionService:ExpressionService;
 
   constructor(public resource: HalResource,
               public name: string,
               public schema) {
     super(resource, name, schema);
-
-    this.ExpressionService = <ExpressionService>this.$injector.get('ExpressionService');
+    injectorBridge(this);
   }
 
   public render(element: HTMLElement, displayText): void {
@@ -62,3 +62,5 @@ export class FormattableDisplayField extends DisplayField {
     return this.ExpressionService.unescape(html);
   }
 }
+
+FormattableDisplayField.$inject = ['ExpressionService'];

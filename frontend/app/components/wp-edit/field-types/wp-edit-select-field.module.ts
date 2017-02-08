@@ -29,6 +29,8 @@
 import {EditField} from '../wp-edit-field/wp-edit-field.module';
 
 export class SelectEditField extends EditField {
+  public I18n:op.I18n;
+
   public options:any[];
   public template:string = '/components/wp-edit/field-types/wp-edit-select-field.directive.html';
   public text;
@@ -38,7 +40,6 @@ export class SelectEditField extends EditField {
   constructor(workPackage, fieldName, schema) {
     super(workPackage, fieldName, schema);
 
-    const I18n:any = this.$injector.get('I18n');
     this.text = {
       requiredPlaceholder: I18n.t('js.placeholders.selection'),
       placeholder: I18n.t('js.placeholders.default')
@@ -99,3 +100,5 @@ export class SelectEditField extends EditField {
     }
   }
 }
+
+SelectEditField.$inject = ['I18n'];

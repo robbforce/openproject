@@ -38,9 +38,6 @@ export class WorkPackageFieldService {
     (this.constructor as typeof WorkPackageFieldService).fieldFactory.defaultType = value;
   }
 
-  constructor(protected $injector) {
-  }
-
   public getField(resource, fieldName:string, schema) {
     return (this.constructor as typeof WorkPackageFieldService).fieldFactory.create(resource, fieldName, schema);
   }
@@ -51,7 +48,6 @@ export class WorkPackageFieldService {
 
   public addFieldType(fieldClass:typeof Field, displayType:string, fields:string[]) {
     fieldClass.type = displayType;
-    fieldClass.$injector = this.$injector;
     (this.constructor as typeof WorkPackageFieldService).fieldFactory.register(fieldClass, fields);
     return this;
   }

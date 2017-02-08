@@ -30,7 +30,6 @@ import {HalResource} from '../api/api-v3/hal-resources/hal-resource.service';
 
 export class Field {
   public static type:string;
-  public static $injector:ng.auto.IInjectorService;
 
   public get value() {
     return this.resource[this.name];
@@ -62,14 +61,6 @@ export class Field {
 
   public get unknownAttribute():boolean {
     return this.isEmpty && !this.schema;
-  }
-
-  protected get $injector():ng.auto.IInjectorService {
-    return (this.constructor as typeof Field).$injector;
-  }
-
-  protected $inject(name):any {
-    return this.$injector.get(name);
   }
 
   constructor(public resource:HalResource,
