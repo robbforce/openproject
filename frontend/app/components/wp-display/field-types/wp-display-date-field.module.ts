@@ -45,3 +45,5 @@ export class DateDisplayField extends DisplayField {
     return this.WorkPackagesHelper.formatValue(this.value, 'Date');
   }
 }
+
+DateDisplayField.$inject = ['WorkPackagesHelper'];

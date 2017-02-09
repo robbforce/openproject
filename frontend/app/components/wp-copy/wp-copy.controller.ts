@@ -34,6 +34,11 @@ import {
 } from '../api/api-v3/hal-resources/work-package-resource.service';
 
 export class WorkPackageCopyController extends WorkPackageCreateController {
+  constructor(public $injector, public $scope) {
+    super($injector, $scope);
+  }
+
+
   protected newWorkPackageFromParams(stateParams) {
     var deferred = this.$q.defer();
 

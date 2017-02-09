@@ -6,8 +6,7 @@
        lang-attribute
        lang="{{locale}}"
        id="{{ headerName }}">
-       {{headerTitle}}</a>
-    <a ng-if="!sortable">{{headerTitle}}</a>
+       {{headerTitle}}</a><a ng-if="!sortable">{{headerTitle}}</a>
     <label class="hidden-for-sighted" aria-hidden="true" for="{{ headerTitle }}"> {{ fullTitle }} </label>
     <icon-wrapper css-class="dropdown-indicator icon-small"
                   icon-name="pulldown"

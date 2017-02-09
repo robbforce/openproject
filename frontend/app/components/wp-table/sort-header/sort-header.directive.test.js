@@ -91,10 +91,10 @@ describe('sortHeader Directive', function() {
           scope.$apply();
 
           var link2 = element2.find('span a').first();
-          expect(link2.text()).to.equal('Type');
+          expect(link2.text().trim()).to.equal('Type');
 
           var link1 = element1.find('span a').first();
-          expect(link1.text()).to.equal('Status');
+          expect(link1.text().trim()).to.equal('Status');
         });
 
         it('should add ascending/descending sort classes to header', function() {

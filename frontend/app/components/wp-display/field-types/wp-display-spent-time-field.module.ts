@@ -31,10 +31,13 @@ import {DurationDisplayField} from './wp-display-duration-field.module';
 import {injectorBridge} from '../../angular/angular-injector-bridge.functions';
 
 export class SpentTimeDisplayField extends DurationDisplayField {
+  public PathHelper;
+  public TimezoneService;
+  public I18n;
+
   public template: string = '/components/wp-display/field-types/wp-display-spent-time-field.directive.html';
   public text: any;
   public timeEntriesLink: string;
-  private PathHelper;
 
   constructor(public resource: WorkPackageResourceInterface,
               public name: string,
@@ -72,4 +75,4 @@ export class SpentTimeDisplayField extends DurationDisplayField {
 
 }
 
-SpentTimeDisplayField.$inject = ['PathHelper'];
+SpentTimeDisplayField.$inject = ['PathHelper', 'TimezoneService', 'I18n'];

@@ -60,6 +60,18 @@ describe('workPackageCommentDirectiveTest', function() {
     $provide.constant('WorkPackageService', {});
   }));
 
+  beforeEach(angular.mock.inject(function($injector) {
+    var original = angular.element;
+    angular.element = function() {
+      var result = original.apply(this, arguments);
+      result.injector = function() { return $injector; };
+      return result;
+    }
+    for (var prop in original) {
+      angular.element[prop] = original[prop];
+    }
+  }));
+
   beforeEach(inject(function($rootScope, $compile, $q, _I18n_, _ActivityService_) {
     I18n = _I18n_;
     q = $q;
@@ -67,6 +79,8 @@ describe('workPackageCommentDirectiveTest', function() {
 
     compile = function() {
       workPackageFieldService.isEmpty = sinon.stub().returns(true);
+      var body = angular.element(document.body);
+      body.append(element);
       element = $compile(html)(scope);
       scope.$digest();
     };
@@ -85,6 +99,7 @@ describe('workPackageCommentDirectiveTest', function() {
   }));
 
   afterEach(function() {
+    element.remove();
     I18n.t.restore();
     ActivityService.createComment.restore();
   });

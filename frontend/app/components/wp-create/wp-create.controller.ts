@@ -1,3 +1,4 @@
+import {injectorBridge} from '../angular/angular-injector-bridge.functions';
 // -- copyright
 // OpenProject is a project management system.
 // Copyright (C) 2012-2015 the OpenProject Foundation (OPF)
@@ -37,6 +38,19 @@ import {WorkPackageNotificationService} from '../wp-edit/wp-notification.service
 import {States} from '../states.service';
 
 export class WorkPackageCreateController {
+  public $state;
+  public $rootScope:IRootScopeService;
+  public $q:ng.IQService;
+  public wpNotificationsService:WorkPackageNotificationService;
+  public states:States;
+  public loadingIndicator;
+  public wpCreate:WorkPackageCreateService;
+  public wpEditModeState:WorkPackageEditModeStateService;
+  public wpTableSelection:WorkPackageTableSelection;
+  public wpCacheService:WorkPackageCacheService;
+  public I18n:op.I18n;
+
+
   public newWorkPackage:WorkPackageResource|any;
   public parentWorkPackage:WorkPackageResource|any;
   public successState:string;
@@ -66,27 +80,19 @@ export class WorkPackageCreateController {
 
   }
 
-  constructor(protected $state,
-              protected $scope,
-              protected $rootScope:IRootScopeService,
-              protected $q:ng.IQService,
-              protected I18n:op.I18n,
-              protected wpNotificationsService:WorkPackageNotificationService,
-              protected states:States,
-              protected loadingIndicator,
-              protected wpCreate:WorkPackageCreateService,
-              protected wpEditModeState:WorkPackageEditModeStateService,
-              protected wpTableSelection:WorkPackageTableSelection,
-              protected wpCacheService:WorkPackageCacheService) {
+  constructor(public $injector, public $scope) {
+    this.$inject('$state', '$rootScope', '$q', 'wpNotificationsService',
+                 'wpCacheService', 'states', 'loadingIndicator', 'wpCreate',
+                 'wpEditModeState', 'wpTableSelection', 'wpCacheService', 'I18n');
 
-    this.newWorkPackageFromParams($state.params)
+    this.newWorkPackageFromParams(this.$state.params)
       .then(wp => {
         this.newWorkPackage = wp;
         this.wpEditModeState.start();
-        wpCacheService.updateWorkPackage(wp);
+        this.wpCacheService.updateWorkPackage(wp);
 
-        if ($state.params.parent_id) {
-          wpCacheService.loadWorkPackage($state.params.parent_id).observeOnScope($scope)
+        if (this.$state.params.parent_id) {
+          this.wpCacheService.loadWorkPackage(this.$state.params.parent_id).observeOnScope($scope)
             .subscribe(parent => {
               this.parentWorkPackage = parent;
               this.newWorkPackage.parent = parent;
@@ -95,6 +101,12 @@ export class WorkPackageCreateController {
       })
       .catch(error => this.wpNotificationsService.handleErrorResponse(error));
   }
+
+  protected $inject(...args:string[]) {
+    args.forEach(field => {
+      this[field] = this.$injector.get(field);
+    });
+  }  
 
   protected newWorkPackageFromParams(stateParams) {
     const type = parseInt(stateParams.type);
