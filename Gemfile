@@ -63,7 +63,7 @@ gem 'color-tools', '~> 1.3.0', require: 'color'
 gem 'ruby-progressbar'
 
 # Provide timezone info for TZInfo used by AR
-gem 'tzinfo-data', '~> 1.2016.1'
+gem 'tzinfo-data', '~> 1.2016.1', platforms: [:mingw, :x64_mingw, :mswin, :jruby]
 
 # to generate html-diffs (e.g. for wiki comparison)
 gem 'htmldiff'
@@ -82,6 +82,7 @@ gem 'ruby-duration', '~> 3.2.0'
 gem 'sys-filesystem', '~> 1.1.4', require: false
 
 gem 'bcrypt', '~> 3.1.6'
+gem 'bcrypt-ruby', '~> 3.0.0', :require => "bcrypt"
 
 # We rely on this specific version, which is the latest as of now (end of 2016),
 # because we have to apply to it a bugfix which could break things in other versions.
@@ -128,7 +129,7 @@ group :production do
   gem 'dalli', '~> 2.7.6'
 
   # Unicorn worker killer to restart unicorn child workers
-  gem 'unicorn-worker-killer', require: false
+  #gem 'unicorn-worker-killer', require: false
 end
 
 gem 'sprockets', '~> 3.7.0'
@@ -143,7 +144,7 @@ gem 'cocaine', '~> 0.5.8'
 
 # required by Procfile, for deployment on heroku or packaging with packager.io.
 # also, better than thin since we can control worker concurrency.
-gem 'unicorn'
+#gem 'unicorn'
 
 gem 'nokogiri', '~> 1.6.8'
 
@@ -239,13 +240,42 @@ gem 'grape-cache_control', '~> 1.0.1'
 gem 'roar',   '~> 1.0.0'
 gem 'reform', '~> 1.2.6', require: false
 
+# Include database gems for the adapters found in the database
+# configuration file
 platforms :mri, :mingw, :x64_mingw do
-  group :mysql2 do
-    gem 'mysql2', '~> 0.4.4'
-  end
-
-  group :postgres do
-    gem 'pg', '~> 0.19.0'
+  require 'erb'
+  require 'yaml'
+  database_file = File.join(File.dirname(__FILE__), "config/database.yml")
+  if File.exist?(database_file)
+    database_config = YAML::load(ERB.new(IO.read(database_file)).result)
+    adapters = database_config.values.map {|c| c['adapter']}.compact.uniq
+    if adapters.any?
+      adapters.each do |adapter|
+        case adapter
+        when 'mysql2'
+          gem "mysql2", "~> 0.4.4", :platforms => [:mri, :mingw, :x64_mingw]
+          gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
+        when 'mysql'
+          gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
+        when /postgresql/
+          gem "pg", "~> 0.19.0", :platforms => [:mri, :mingw, :x64_mingw]
+          gem "activerecord-jdbcpostgresql-adapter", :platforms => :jruby
+        when /sqlite3/
+          gem "sqlite3", :platforms => [:mri, :mingw, :x64_mingw]
+          gem "jdbc-sqlite3", ">= 3.8.10.1", :platforms => :jruby
+          gem "activerecord-jdbcsqlite3-adapter", :platforms => :jruby
+        when /sqlserver/
+          gem "tiny_tds", :platforms => [:mri, :mingw, :x64_mingw]
+          gem "activerecord-sqlserver-adapter", :platforms => [:mri, :mingw, :x64_mingw]
+        else
+          warn("Unknown database adapter `#{adapter}` found in config/database.yml, use Gemfile.local to load your own database gems")
+        end
+      end
+    else
+      warn("No adapter found in config/database.yml, please configure it first")
+    end
+  else
+    warn("Please configure your config/database.yml first")
   end
 end
 
