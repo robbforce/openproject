@@ -1,0 +1,73 @@
+application:
+  application: ZooRubyProject
+  title: Ruby Project
+  description: "Sample Ruby project with instruction how to run Ruby applications\
+    \ with Helicon Zoo.\nPlease use this project as a starting point for your development\
+    \ or to deploy existing application by\nsimply overwriting files of this project.\
+    \ This project can run on both Ruby 1.9 and Ruby.2.3 using HTTP\nor FastCGI engines.\
+    \    \n"
+  link: http://www.helicontech.com/zoo/
+  author: Helicon Tech
+  icon: C:\Zoo\zoo_repository\Templates\Ruby\ruby-100x100.png
+  tags:
+  - template
+  eula: http://www.helicontech.com/zoo/license.html
+  os: windows
+  version: '1.0'
+  installed_version: ''
+  dependencies:
+  - or:
+    - Ruby.2.3.FCGI.Engine
+    - Ruby.2.3.HTTP.Engine
+    - Ruby.1.9.FCGI.Engine
+    - Ruby.1.9.HTTP.Engine
+  files:
+  - file: C:\Zoo\zoo_repository\Templates\Ruby\template.zip
+    filename: template.zip
+  install_command: |-
+    install_path = parameters['physical-path']
+    os.un7zip(files[0].path, install_path )
+    windows.set_write_permission(install_path, 'IIS_IUSRS')
+    os.chdir(install_path)
+    os.cmd(r'gem install bundler')
+    print("Doing 'bundle install'")
+    os.cmd(r'gem install bundler')
+    os.cmd(r'bundle install')
+  parameters:
+    site-name: App Dev Solutions
+    create-app: true
+    app-name: /openproject
+    selected-engine: Ruby.2.3.FCGI.Engine
+    app-pool-name: openproject
+    physical-path: c:\inetpub\App Dev Solutions\openproject
+  engines:
+  - engine: Ruby.2.3.FCGI.Engine
+    environment_variables:
+      RAILS_RELATIVE_URL_ROOT: '%APPL_VIRTUAL_PATH%'
+      RACK_ENV: development
+      ERROR_LOG_DIR: log
+  - engine: Ruby.2.3.HTTP.Engine
+    environment_variables:
+      RAILS_RELATIVE_URL_ROOT: '%APPL_VIRTUAL_PATH%'
+      RACK_ENV: development
+      ERROR_LOG_DIR: log
+  - engine: Ruby.1.9.FCGI.Engine
+    environment_variables:
+      RAILS_RELATIVE_URL_ROOT: '%APPL_VIRTUAL_PATH%'
+      RACK_ENV: development
+      ERROR_LOG_DIR: log
+  - engine: Ruby.1.9.HTTP.Engine
+    environment_variables:
+      RAILS_RELATIVE_URL_ROOT: '%APPL_VIRTUAL_PATH%'
+      RACK_ENV: development
+      ERROR_LOG_DIR: log
+  database_type: null
+  start_page: null
+  locations:
+  - path: public
+    engine: none
+  - path: '*'
+    engine: Ruby.2.3.FCGI.Engine
+  name: ZooRubyProject
+  has_upgrade: false
+  is_upgradable: false
