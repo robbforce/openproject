@@ -39,7 +39,7 @@ function runPluginsInfo() {
   var currentWorkingDir = process.cwd();
   // Make sure we're in the root directory to launch the plugin_info script
   process.chdir(path.join(__dirname, '..'));
-  var fullCmd = exec(PLUGIN_INFO_CMD_PATH, { silent: false });
+  var fullCmd = exec('ruby ' + PLUGIN_INFO_CMD_PATH, { silent: false });
   process.chdir(currentWorkingDir);
   return fullCmd.code === 0 ? fullCmd.output : '{}';
 }
