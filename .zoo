@@ -44,8 +44,13 @@ application:
   - engine: Ruby.2.3.FCGI.Engine
     environment_variables:
       RAILS_RELATIVE_URL_ROOT: '%APPL_VIRTUAL_PATH%'
-      RACK_ENV: development
       ERROR_LOG_DIR: log
+      GEM_PATH: '%APPL_PHYSICAL_SHORT_PATH%\.gems;%ENGINE_PATH%\lib\ruby\gems\2.3.0'
+      GEM_HOME: '%APPL_PHYSICAL_SHORT_PATH%\.gems'
+      RAILS_ENV: development
+      SECRET_KEY_BASE: d7e51ed4bc3be419f28a1752e0de28b20d667209131d0bb1742c21d20f4868cc1b3982247726f4237dd3f7e9410f7d5c135dafb4c6bd74fa0fa074a049cf3f30
+      PATH: C:\OpenSSL\bin;%ENGINE_PATH%\bin;%APPL_PHYSICAL_SHORT_PATH%\.gems\bin;%DEVKIT_PATH%\bin;%DEVKIT_PATH%\mingw\cmd;C:\nodejs;%PATH%
+      RACK_ENV: development
   - engine: Ruby.2.3.HTTP.Engine
     environment_variables:
       RAILS_RELATIVE_URL_ROOT: '%APPL_VIRTUAL_PATH%'
