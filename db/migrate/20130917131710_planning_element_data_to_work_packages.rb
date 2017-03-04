@@ -91,27 +91,41 @@ class PlanningElementDataToWorkPackages < ActiveRecord::Migration[4.2]
   end
 
   def get_default_status_id
-    default_status = select_one <<-SQL
-      SELECT id
-      FROM #{db_statuses_table}
-      WHERE is_default = true OR position = 1
-      ORDER BY is_default DESC
-      LIMIT 1
-    SQL
-
-    default_status['id']
+    if sqlserver?
+      default_status = select_one <<-SQL
+        SELECT TOP 1 id
+        FROM #{db_statuses_table}
+        WHERE is_default = true OR position = 1
+        ORDER BY is_default DESC
+      SQL
+    else
+      default_status = select_one <<-SQL
+        SELECT id
+        FROM #{db_statuses_table}
+        WHERE is_default = true OR position = 1
+        ORDER BY is_default DESC
+        LIMIT 1
+      SQL
+    end
   end
 
   def get_default_priority_id
-    default_priority = select_one <<-SQL
-      SELECT id
-      FROM #{db_enumerations_table}
-      WHERE #{db_column('is_default')} = #{quoted_true}
-      AND #{db_column('type')} = #{quote('IssuePriority')}
-      LIMIT 1
-    SQL
-
-    default_priority['id']
+    if sqlserver?
+      default_priority = select_one <<-SQL
+        SELECT TOP 1 id
+        FROM #{db_enumerations_table}
+        WHERE #{db_column('is_default')} = #{quoted_true}
+          AND #{db_column('type')} = #{quote('IssuePriority')}
+      SQL
+    else
+      default_priority = select_one <<-SQL
+        SELECT id
+        FROM #{db_enumerations_table}
+        WHERE #{db_column('is_default')} = #{quoted_true}
+          AND #{db_column('type')} = #{quote('IssuePriority')}
+        LIMIT 1
+      SQL
+    end
   end
 
   # Apends all entries from the legacy_planning_elements table to
@@ -324,13 +338,22 @@ class PlanningElementDataToWorkPackages < ActiveRecord::Migration[4.2]
   end
 
   def skip_on_no_planning_elements
-    planning_element = suppress_messages {
-      select_one <<-SQL
-        SELECT #{db_column('id')}
-        FROM #{db_planning_elements_table}
-        LIMIT 1
-      SQL
-    }
+    if sqlserver?
+      planning_element = suppress_messages {
+        select_one <<-SQL
+          SELECT TOP 1 #{db_column('id')}
+          FROM #{db_planning_elements_table}
+        SQL
+      }
+    else
+      planning_element = suppress_messages {
+        select_one <<-SQL
+          SELECT #{db_column('id')}
+          FROM #{db_planning_elements_table}
+          LIMIT 1
+        SQL
+      }
+    end
 
     if planning_element.present?
       false

@@ -48,7 +48,33 @@ class FixWatcherWorkPackageAssociations < ActiveRecord::Migration[4.2]
   end
 
   def adapt_planning_element_ids
-    if postgres?
+    if mysql?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE #{watchers_table} AS first
+        LEFT JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.id
+        SET watchable_id = second.new_id
+        WHERE watchable_type = #{quote_value('Timelines::PlanningElement')};
+      SQL
+    elsif sqlite?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE #{watchers_table}
+        SET watchable_id = (
+          SELECT second.new_id
+          FROM #{watchers_table} AS first
+            LEFT JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.id
+          WHERE first.watchable_type = #{quote_value('Timelines::PlanningElement')})
+        WHERE watchable_id IN (SELECT id FROM #{legacy_planning_elements_table})
+          AND watchable_type = #{quote_value('Timelines::PlanningElement')};
+      SQL
+    elsif sqlserver?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE #{watchers_table}
+        SET watchable_id = second.new_id
+        FROM #{watchers_table} AS first
+          LEFT OUTER JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.id
+        WHERE watchable_type = #{quote_value('Timelines::PlanningElement')};
+      SQL
+    else
       ActiveRecord::Base.connection.execute <<-SQL
         UPDATE #{watchers_table}
          SET watchable_id = tmp.new_id
@@ -62,18 +88,40 @@ class FixWatcherWorkPackageAssociations < ActiveRecord::Migration[4.2]
           WHERE watchers.watchable_id = tmp.watchable_id
           AND watchers.watchable_type = #{quote_value('Timelines::PlanningElement')};
       SQL
-    elsif mysql?
-      ActiveRecord::Base.connection.execute <<-SQL
-        UPDATE #{watchers_table} AS first
-        LEFT JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.id
-        SET watchable_id = second.new_id
-        WHERE watchable_type = #{quote_value('Timelines::PlanningElement')};
-      SQL
     end
   end
 
   def revert_planning_element_ids_and_types
-    if postgres?
+    if mysql?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE #{watchers_table} AS first
+        INNER JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.new_id
+        SET watchable_id = second.id,
+            watchable_type = #{quote_value('Timelines::PlanningElement')}
+        WHERE watchable_type = #{quote_value('WorkPackage')};
+      SQL
+    elsif sqlite?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE #{watchers_table}
+        SET watchable_id = (
+          SELECT second.id
+          FROM #{watchers_table} AS first
+            INNER JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.new_id
+          WHERE first.watchable_type = #{quote_value('WorkPackage')}),
+          watchable_type = #{quote_value('Timelines::PlanningElement')}
+        WHERE watchable_id IN (SELECT new_id FROM #{legacy_planning_elements_table})
+          AND watchable_type = #{quote_value('WorkPackage')};
+      SQL
+    elsif sqlserver?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE #{watchers_table}
+        SET watchable_id = second.id,
+          watchable_type = #{quote_value('Timelines::PlanningElement')}
+        FROM #{watchers_table} AS first
+          INNER JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.new_id
+        WHERE watchable_type = #{quote_value('WorkPackage')};
+      SQL
+    else
       ActiveRecord::Base.connection.execute <<-SQL
         UPDATE #{watchers_table}
          SET watchable_id = tmp.id,
@@ -87,14 +135,6 @@ class FixWatcherWorkPackageAssociations < ActiveRecord::Migration[4.2]
           ) AS tmp
           WHERE watchers.watchable_id = tmp.watchable_id
           AND watchers.watchable_type = #{quote_value('WorkPackage')};
-      SQL
-    elsif mysql?
-      ActiveRecord::Base.connection.execute <<-SQL
-        UPDATE #{watchers_table} AS first
-        INNER JOIN #{legacy_planning_elements_table} AS second ON first.watchable_id = second.new_id
-        SET watchable_id = second.id,
-            watchable_type = #{quote_value('Timelines::PlanningElement')}
-        WHERE watchable_type = #{quote_value('WorkPackage')};
       SQL
     end
   end
@@ -117,5 +157,13 @@ class FixWatcherWorkPackageAssociations < ActiveRecord::Migration[4.2]
 
   def mysql?
     ActiveRecord::Base.connection.instance_values['config'][:adapter] == 'mysql2'
+  end
+
+  def sqlite?
+    ActiveRecord::Base.connection.instance_values['config'][:adapter] == 'sqlite3'
+  end
+  
+  def sqlserver?
+    ActiveRecord::Base.connection.instance_values['config'][:adapter] == 'sqlserver'
   end
 end

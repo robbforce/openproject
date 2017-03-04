@@ -33,7 +33,38 @@ class FixParentIdsInWorkPackageJournalsOfFormerPlanningElements < ActiveRecord::
   include Migration::Utils
 
   def up
-    if postgres?
+    if mysql?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE work_package_journals AS wpj
+          JOIN journals AS j ON (j.id = wpj.journal_id)
+          JOIN legacy_planning_elements AS lpe ON (lpe.new_id = j.journable_id)
+          LEFT JOIN legacy_planning_elements AS parent ON parent.id = wpj.parent_id
+        SET wpj.parent_id = parent.new_id
+        WHERE parent.id IS NOT NULL;
+      SQL
+    elsif sqlite?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE work_package_journals
+          SET parent_id = (
+            SELECT lpea.new_id AS lpea_new_id
+            FROM legacy_planning_elements AS lpe
+              JOIN journals AS j ON j.journable_id = lpe.new_id AND j.journable_type = 'WorkPackage'
+              JOIN work_package_journals AS wpj ON wpj.journal_id = j.id
+              LEFT JOIN legacy_planning_elements AS lpea ON lpea.id = wpj.parent_id
+            WHERE wpj.parent_id IS NOT NULL AND lpea.new_id IS NOT NULL)
+        WHERE id IN (SELECT id FROM work_package_journals);
+      SQL
+    elsif sqlserver?
+      ActiveRecord::Base.connection.execute <<-SQL
+        UPDATE work_package_journals
+        SET parent_id = parent.new_id
+        FROM work_package_journals AS wpj
+          INNER JOIN journals AS j ON j.id = wpj.journal_id
+          INNER JOIN legacy_planning_elements AS lpe ON lpe.new_id = j.journable_id
+          LEFT OUTER JOIN legacy_planning_elements AS parent ON parent.id = wpj.parent_id
+        WHERE parent.id IS NOT NULL;
+      SQL
+    else
       ActiveRecord::Base.connection.execute <<-SQL
         UPDATE work_package_journals AS o_wpj
           SET parent_id = tmp.lpea_new_id
@@ -46,15 +77,6 @@ class FixParentIdsInWorkPackageJournalsOfFormerPlanningElements < ActiveRecord::
             ORDER BY j.journable_id, j.id
           ) AS tmp
         WHERE o_wpj.id = tmp.wpj_id;
-      SQL
-    elsif mysql?
-      ActiveRecord::Base.connection.execute <<-SQL
-        UPDATE work_package_journals AS wpj
-          JOIN journals AS j ON (j.id = wpj.journal_id)
-          JOIN legacy_planning_elements AS lpe ON (lpe.new_id = j.journable_id)
-          LEFT JOIN legacy_planning_elements AS parent ON parent.id = wpj.parent_id
-        SET wpj.parent_id = parent.new_id
-        WHERE parent.id IS NOT NULL;
       SQL
     end
   end

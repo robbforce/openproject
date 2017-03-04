@@ -46,7 +46,7 @@ class ClearIdentityUrlsOnUsers < ActiveRecord::Migration[4.2]
                JOIN legacy_user_identity_urls lu ON u.id = lu.id
                SET u.identity_url = lu.identity_url"
 
-    elsif postgres?
+    elsif postgres? || sqlserver? || sqlite?
 
       execute "UPDATE users
                SET identity_url = lu.identity_url
@@ -54,7 +54,7 @@ class ClearIdentityUrlsOnUsers < ActiveRecord::Migration[4.2]
                WHERE users.id = lu.id"
 
     else
-      raise 'The down part of this migration only supports MySQL and PostgreSQL.'
+      raise 'The down part of this migration only supports MySQL, PostgreSQL, SQLite and MS SQL Server.'
     end
 
     drop_table :legacy_user_identity_urls
@@ -66,5 +66,13 @@ class ClearIdentityUrlsOnUsers < ActiveRecord::Migration[4.2]
 
   def mysql?
     ActiveRecord::Base.connection.instance_values['config'][:adapter] == 'mysql2'
+  end
+
+  def sqlite?
+    ActiveRecord::Base.connection.instance_values['config'][:adapter] == 'sqlite3'
+  end
+  
+  def sqlserver?
+    ActiveRecord::Base.connection.instance_values['config'][:adapter] == 'sqlserver'
   end
 end

@@ -29,13 +29,16 @@
 
 class UseTheFullStiClassNamesForRepositories < ActiveRecord::Migration[4.2]
   def self.up
-    concatenation = "('Repository::' || type)"
-
     # special concat for mysql
     if OpenProject::Database.mysql?
       concatenation = "CONCAT('Repository::', type)"
+    # special concat for mssql
+    elsif OpenProject::Database.sqlserver?
+      concatenation = "('Repository::' + isnull(type, ''))"
+    else
+      concatenation = "('Repository::' || type)"
     end
-
+	
     Repository.where("type NOT LIKE 'Repository::%'").update_all "type = #{concatenation}"
   end
 

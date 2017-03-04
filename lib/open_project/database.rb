@@ -39,7 +39,9 @@ module OpenProject
     def self.supported_adapters
       @adapters ||= ({
         mysql: /mysql/i,
-        postgresql: /postgres/i
+        postgresql: /postgres/i,
+        sqlite: /sqlite3/i,
+        sqlserver: /sqlserver/i
       })
     end
 
@@ -79,6 +81,10 @@ module OpenProject
       when :postgresql
         version = ActiveRecord::Base.connection.select_value('SELECT version()')
         raw ? version : version.match(/\APostgreSQL (\S+)/i)[1]
+      when :sqlite
+        version = ActiveRecord::Base.connection.select_value('SELECT sqlite_version()')
+      when :sqlserver
+        version = ActiveRecord::Base.connection.select_value('SELECT SERVERPROPERTY(''ProductVersion'')')
       end
     end
   end

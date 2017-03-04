@@ -48,6 +48,8 @@ module ConnectionIsolationLevel
       connection.execute("SET SESSION TRANSACTION #{isolation_level}")
     elsif OpenProject::Database.postgresql?(connection)
       connection.execute("SET SESSION CHARACTERISTICS AS TRANSACTION #{isolation_level}")
+    elsif OpenProject::Database.sqlserver?(connection)
+      connection.execute("SET TRANSACTION #{isolation_level}")
     end
   end
 end

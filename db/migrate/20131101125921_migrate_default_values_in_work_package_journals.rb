@@ -33,7 +33,7 @@ class MigrateDefaultValuesInWorkPackageJournals < ActiveRecord::Migration[4.2]
   include Migration::Utils
 
   def up
-    raise 'This migration does not support your database!' unless postgres? || mysql?
+    raise 'This migration does not support your database!' unless postgres? || mysql? || sqlite? || sqlserver?
 
     journal_fields.each do |field|
       migrate_field field
@@ -49,7 +49,38 @@ class MigrateDefaultValuesInWorkPackageJournals < ActiveRecord::Migration[4.2]
   end
 
   def migrate_field(field)
-    if postgres?
+    if mysql?
+      execute <<-SQL
+        UPDATE work_package_journals AS wpj
+          LEFT JOIN journals AS j ON j.id = wpj.journal_id
+          LEFT JOIN work_packages AS wp ON wp.id = j.journable_id
+        SET wpj.#{field} = wp.#{field}
+        WHERE wpj.#{field} = 0;
+      SQL
+    elsif sqlite?
+      execute <<-SQL
+        UPDATE work_package_journals
+        SET #{field} = (
+          SELECT wp.#{field}
+          FROM work_package_journals AS wpj
+            LEFT OUTER JOIN journals AS j ON wpj.journal_id = j.id
+            LEFT OUTER JOIN work_packages AS wp ON j.journable_id = wp.id)
+        WHERE #{field} = 0
+          AND journal_id IN (
+            SELECT j.id
+            FROM journals AS j
+              LEFT OUTER JOIN work_packages AS wp ON j.journable_id = wp.id); 
+      SQL
+    elsif sqlserver?
+      execute <<-SQL
+        UPDATE work_package_journals
+        SET #{field} = wp.#{field}
+        FROM work_package_journals AS wpj
+          LEFT OUTER JOIN journals AS j ON wpj.journal_id = j.id
+          LEFT OUTER JOIN work_packages AS wp ON j.journable_id = wp.id
+        WHERE wpj.#{field} = 0;
+      SQL
+    else
       execute <<-SQL
         UPDATE work_package_journals AS wpj
         SET #{field} = tmp.#{field}
@@ -60,14 +91,6 @@ class MigrateDefaultValuesInWorkPackageJournals < ActiveRecord::Migration[4.2]
           LEFT JOIN work_packages AS wp ON wp.id = j.journable_id
         ) AS tmp
         WHERE wpj.id = tmp.id AND wpj.#{field} = 0;
-      SQL
-    elsif mysql?
-      execute <<-SQL
-        UPDATE work_package_journals AS wpj
-          LEFT JOIN journals AS j ON j.id = wpj.journal_id
-          LEFT JOIN work_packages AS wp ON wp.id = j.journable_id
-        SET wpj.#{field} = wp.#{field}
-        WHERE wpj.#{field} = 0;
       SQL
     end
   end
