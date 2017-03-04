@@ -27,6 +27,10 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
+if Rails.gem_version < Gem::Version.new('5.0.1')
+  require_relative 'migration_utils/ar_parameter_patch'
+end
+
 class QueryEmptyColumnNamesToArray < ActiveRecord::Migration[5.0]
   class QueryWithWhatever < ActiveRecord::Base
     self.table_name = :queries
@@ -34,6 +38,10 @@ class QueryEmptyColumnNamesToArray < ActiveRecord::Migration[5.0]
   end
 
   def up
+    if Rails.gem_version < Gem::Version.new('5.0.1')
+      ArParametersPatch.load
+    end
+
     QueryWithWhatever.transaction do
       empty = QueryWithWhatever.where(column_names: '')
       null = QueryWithWhatever.where(column_names: nil)

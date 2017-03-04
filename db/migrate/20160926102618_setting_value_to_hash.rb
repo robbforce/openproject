@@ -27,6 +27,10 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
+if Rails.gem_version < Gem::Version.new('5.0.1')
+  require_relative 'migration_utils/ar_parameter_patch'
+end
+
 class SettingValueToHash < ActiveRecord::Migration[5.0]
   class SettingWithWhatever < ActiveRecord::Base
     self.table_name = :settings
@@ -41,6 +45,10 @@ class SettingValueToHash < ActiveRecord::Migration[5.0]
   end
 
   def up
+    if Rails.gem_version < Gem::Version.new('5.0.1')
+      ArParametersPatch.load
+    end
+
     SettingWithWhatever.transaction do
       SettingWithWhatever.all.to_a.each do |setting|
         value = setting.value

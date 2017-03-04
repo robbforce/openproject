@@ -27,6 +27,10 @@
 # See doc/COPYRIGHT.rdoc for more details.
 #++
 
+if Rails.gem_version < Gem::Version.new('5.0.1')
+  require_relative 'migration_utils/ar_parameter_patch'
+end
+
 class TimelineOptionsToHash < ActiveRecord::Migration[5.0]
   class TimelineWithWhatever < ActiveRecord::Base
     self.table_name = :timelines
@@ -41,6 +45,10 @@ class TimelineOptionsToHash < ActiveRecord::Migration[5.0]
   end
 
   def up
+    if Rails.gem_version < Gem::Version.new('5.0.1')
+      ArParametersPatch.load
+    end
+
     TimelineWithWhatever.transaction do
       TimelineWithWhatever.all.to_a.each do |timeline|
         options = timeline.options
