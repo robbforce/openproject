@@ -1,13 +1,13 @@
 class AddSlugToWikiPages < ActiveRecord::Migration[4.2]
   def up
     add_column :wiki_pages, :slug, :string
-    add_index :wiki_pages, [:wiki_id, :slug], name: 'wiki_pages_wiki_id_slug', unique: true
-
     migrate_titles
 
     # Disallow null values from now on
     # Adding this above is impossible due to columns having NULL values before `migrate_titles`
     change_column_null :wiki_pages, :slug, false
+    
+    add_index :wiki_pages, [:wiki_id, :slug], name: 'wiki_pages_wiki_id_slug', unique: true
   end
 
   def down
