@@ -50,7 +50,8 @@ class CreateTimelinesPlanningElements < ActiveRecord::Migration[4.2]
     add_index :timelines_planning_elements, :project_id
     add_index :timelines_planning_elements, :responsible_id
     add_index :timelines_planning_elements, :planning_element_type_id
-    add_index :timelines_planning_elements, :planning_element_status_id
+    add_index :timelines_planning_elements, :planning_element_status_id,
+      name: 'index_planning_element_status_id'
   end
 
   def self.down
