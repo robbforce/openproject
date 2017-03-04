@@ -63,7 +63,7 @@ gem 'color-tools', '~> 1.3.0', require: 'color'
 gem 'ruby-progressbar'
 
 # Provide timezone info for TZInfo used by AR
-gem 'tzinfo-data', '~> 1.2016.1', platforms: [:mingw, :x64_mingw, :mswin, :jruby]
+gem 'tzinfo-data', '~> 1.2016.1', platforms: [:mswin, :mingw, :x64_mingw, :jruby]
 
 # to generate html-diffs (e.g. for wiki comparison)
 gem 'htmldiff'
@@ -82,7 +82,7 @@ gem 'ruby-duration', '~> 3.2.0'
 gem 'sys-filesystem', '~> 1.1.4', require: false
 
 gem 'bcrypt', '~> 3.1.6'
-gem 'bcrypt-ruby', '~> 3.0.0', :require => "bcrypt"
+gem 'bcrypt-ruby', '~> 3.0.0', :require => "bcrypt", platforms: [:mswin, :mingw, :x64_mingw]
 
 # We rely on this specific version, which is the latest as of now (end of 2016),
 # because we have to apply to it a bugfix which could break things in other versions.
@@ -214,6 +214,7 @@ end
 group :development do
   gem 'letter_opener'
   gem 'faker'
+  gem 'psych'
   gem 'livingstyleguide', '~> 2.0.1'
 
   # Pry seems to cause a lot of segfaults in the tests.
@@ -229,9 +230,9 @@ group :development do
   gem 'active_record_query_trace'
 end
 
-group :development, :test do
-  gem 'thin', '~> 1.7.0'
-end
+#group :development, :test do
+#  gem 'thin', '~> 1.7.0'
+#end
 
 # API gems
 gem 'grape', '~> 0.17'
@@ -240,55 +241,47 @@ gem 'grape-cache_control', '~> 1.0.1'
 gem 'roar',   '~> 1.0.0'
 gem 'reform', '~> 1.2.6', require: false
 
-# Include database gems for the adapters found in the database
-# configuration file
-platforms :mri, :mingw, :x64_mingw do
-  require 'erb'
-  require 'yaml'
-  database_file = File.join(File.dirname(__FILE__), "config/database.yml")
-  if File.exist?(database_file)
-    database_config = YAML::load(ERB.new(IO.read(database_file)).result)
-    adapters = database_config.values.map {|c| c['adapter']}.compact.uniq
-    if adapters.any?
-      adapters.each do |adapter|
-        case adapter
-        when 'mysql2'
-          gem "mysql2", "~> 0.4.4", :platforms => [:mri, :mingw, :x64_mingw]
-          gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
-        when 'mysql'
-          gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
-        when /postgresql/
-          gem "pg", "~> 0.19.0", :platforms => [:mri, :mingw, :x64_mingw]
-          gem "activerecord-jdbcpostgresql-adapter", :platforms => :jruby
-        when /sqlite3/
-          gem "sqlite3", :platforms => [:mri, :mingw, :x64_mingw]
-          gem "jdbc-sqlite3", ">= 3.8.10.1", :platforms => :jruby
-          gem "activerecord-jdbcsqlite3-adapter", :platforms => :jruby
-        when /sqlserver/
-          gem "tiny_tds", :platforms => [:mri, :mingw, :x64_mingw]
-          gem "activerecord-sqlserver-adapter", :platforms => [:mri, :mingw, :x64_mingw]
-        else
-          warn("Unknown database adapter `#{adapter}` found in config/database.yml, use Gemfile.local to load your own database gems")
-        end
-      end
-    else
-      warn("No adapter found in config/database.yml, please configure it first")
-    end
-  else
-    warn("Please configure your config/database.yml first")
-  end
+platforms :jruby do
+  # jruby-openssl is bundled with JRuby 1.7.0
+  gem "jruby-openssl" if Object.const_defined?(:JRUBY_VERSION) && JRUBY_VERSION < '1.7.0'
+  gem "activerecord-jdbc-adapter", "~> 1.3.2"
 end
 
-platforms :jruby do
-  gem 'jruby-openssl'
-
-  group :mysql do
-    gem 'activerecord-jdbcmysql-adapter'
+# Include database gems for the adapters found in the database
+# configuration file
+require 'erb'
+require 'yaml'
+database_file = File.join(File.dirname(__FILE__), "config/database.yml")
+if File.exist?(database_file)
+  database_config = YAML::load(ERB.new(IO.read(database_file)).result)
+  adapters = database_config.values.map {|c| c['adapter']}.compact.uniq
+  if adapters.any?
+    adapters.each do |adapter|
+      case adapter
+      when 'mysql2'
+        gem "mysql2", "~> 0.3.11", :platforms => [:mri, :mingw, :x64_mingw]
+        gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
+      when 'mysql'
+        gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
+      when /postgresql/
+        gem "pg", "~> 0.18.1", :platforms => [:mri, :mingw, :x64_mingw]
+        gem "activerecord-jdbcpostgresql-adapter", :platforms => :jruby
+      when /sqlite3/
+        gem "sqlite3", :platforms => [:mri, :mingw, :x64_mingw]
+        gem "jdbc-sqlite3", ">= 3.8.10.1", :platforms => :jruby
+        gem "activerecord-jdbcsqlite3-adapter", :platforms => :jruby
+      when /sqlserver/
+        gem "tiny_tds", "~> 1.0.5", :platforms => [:mri, :mingw, :x64_mingw]
+        gem "activerecord-sqlserver-adapter", :platforms => [:mri, :mingw, :x64_mingw]
+      else
+        warn("Unknown database adapter `#{adapter}` found in config/database.yml, use Gemfile.local to load your own database gems")
+      end
+    end
+  else
+    warn("No adapter found in config/database.yml, please configure it first")
   end
-
-  group :postgres do
-    gem 'activerecord-jdbcpostgresql-adapter'
-  end
+else
+  warn("Please configure your config/database.yml first")
 end
 
 group :opf_plugins do
@@ -302,7 +295,7 @@ group :docker do
   gem 'passenger'
 
   # Used to easily precompile assets
-  gem 'sqlite3', require: false
+  #gem 'sqlite3', require: false
   gem 'rails_12factor', require: !!ENV['HEROKU']
   gem 'health_check', require: !!ENV['HEROKU']
   gem 'newrelic_rpm', require: !!ENV['HEROKU']
