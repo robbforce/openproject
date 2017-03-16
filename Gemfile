@@ -134,7 +134,7 @@ end
 
 gem 'sprockets', '~> 3.7.0'
 gem 'sass-rails', '~> 5.0.6'
-gem 'sass', '3.5.0.pre.rc.1'
+gem 'sass', '~> 3.4.23'
 gem 'autoprefixer-rails', '~> 6.4.1'
 gem 'bourbon', '~> 4.2.0'
 gem 'i18n-js', '>= 3.0.0.rc13'
@@ -223,7 +223,7 @@ group :development do
   gem 'pry-rails', '~> 0.3.4'
   gem 'pry-stack_explorer', '~> 0.4.9.2'
   gem 'pry-rescue', '~> 1.4.4'
-  gem 'pry-byebug', '~> 3.4.0', platforms: [:mri]
+  gem 'pry-byebug', '~> 3.4.0', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry-doc', '~> 0.9.0'
 
   gem 'rubocop'
